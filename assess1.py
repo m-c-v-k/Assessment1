@@ -28,6 +28,11 @@ def connect_db():
 
 
 def list_data(conn):
+    """ Lists all contact information
+
+    Args:
+        conn (Object): Database connection
+    """
     try:
         # Create a cursor.
         cur = conn.cursor()
@@ -54,6 +59,12 @@ def list_data(conn):
 
 
 def insert_data(conn):
+    """ Let's the user insert information into database
+
+    Args:
+        conn (Object): Database connection
+    """
+
     try:
         # Create a cursor.
         cur = conn.cursor()
@@ -137,6 +148,12 @@ VALUES ('{items_contact}', '{contact_id}', '{items_type}', '{items_category}');"
 
 
 def delete_data(conn):
+    """ Let's the user delete contact and it's information from the database
+
+    Args:
+        conn (Object): Database connection
+    """
+
     try:
         # Formatting name
         first_name = input(
@@ -170,12 +187,24 @@ def save_changes(conn):
     """ Commits changes to the database.
 
     Args:
-        conn Object: Database connection
+        conn (Object): Database connection
     """
+
     conn.commit()
 
 
 def find_id(cur, first_name, last_name):
+    """ Finds id of contact using first_name and last_name
+
+    Args:
+        conn (Object): Database connection
+        first_name (String): String containing the first name of a contact
+        last_name (String): String containing the last name of a contact
+
+    Returns:
+        Integer: the id number of the requested contact.
+    """
+
     # Find id
     cur.execute(
         f"SELECT id FROM contacts WHERE first_name = '{first_name}' AND last_name = '{last_name}';")
@@ -191,7 +220,9 @@ def find_id(cur, first_name, last_name):
 
 
 def assessment():
-    # Running the program
+    """ Main function of the program, handles the menu and calling other functions
+    """
+
     conn = connect_db()
 
     # Messages
@@ -238,5 +269,6 @@ def assessment():
     QUIT""")
 
 
+# Running the program
 if __name__ == "__main__":
     assessment()
