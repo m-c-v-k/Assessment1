@@ -26,10 +26,6 @@ def connect_db():
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
-# TODO 2. Fetch data
-# TODO 2.1 Print to console
-# TODO Commit
-
 
 def list_data(conn):
     try:
@@ -57,9 +53,8 @@ def list_data(conn):
         cur.close()
 
 
-# TODO 4. Insert function
 def insert_data(conn):
-    print("Do something")
+    print("do something")
 
 
 def delete_data(conn, first_name, last_name):
