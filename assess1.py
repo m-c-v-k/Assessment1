@@ -59,10 +59,13 @@ def insert_data(conn):
         cur = conn.cursor()
 
         # Get relevant information
-        contacts_first_name = input("Please input the first name").title()
-        contacts_last_name = input("Please input the last name").title()
-        contacts_title = input("Please input the title").title()
-        contacts_organization = input("Please input the organization").title()
+        contacts_first_name = input(
+            "Please input the first name: ").strip().title()
+        contacts_last_name = input(
+            "Please input the last name: ").strip().title()
+        contacts_title = input("Please input the title: ").strip().title()
+        contacts_organization = input(
+            "Please input the organization: ").strip().title()
 
         if contacts_first_name == '':
             contacts_first_name = 'UNKNOWN'
@@ -81,26 +84,17 @@ VALUES ('{contacts_first_name}', '{contacts_last_name}', '{contacts_title}', '{c
         save_changes(conn)
 
         items_numbers = int(
-            input("Please input the number of contact informations to add"))
+            input("Please input the number of contact informations to add: "))
 
-        # Find id
-        cur.execute(
-            f"SELECT id FROM contacts WHERE first_name = '{contacts_first_name}' AND last_name = '{contacts_last_name}';")
-        # Check return from executed statement.
-        rows = cur.fetchall()
-
-        if rows is None:
-            print("Can't find the contact.")
-        else:
-            for row in rows:
-                contact_id = row[0]
+        contact_id = find_id(cur, contacts_first_name, contacts_last_name)
 
         for entries in range(items_numbers):
-            items_contact = input("Please input the contact information")
+            items_contact = input(
+                "Please input the contact information: ").strip()
             items_type = input(
-                "Please input the contact type (Email, Phone, Skype or Instagram)").title()
+                "Please input the contact type (Email, Phone, Skype or Instagram): ").strip().title()
             items_category = input(
-                "Please input the contact category (Home, Work, Fax)").title()
+                "Please input the contact category (Home, Work, Fax): ").strip().title()
 
             if items_contact == '':
                 items_contact = 'UNKNOWN'
@@ -118,12 +112,12 @@ VALUES ('{contacts_first_name}', '{contacts_last_name}', '{contacts_title}', '{c
 
             if items_category == '':
                 items_category = 'NULL'
-            elif items_type == 'Home':
-                items_type = 1
-            elif items_type == 'Work':
-                items_type = 2
-            elif items_type == 'Fax':
-                items_type = 3
+            elif items_category == 'Home':
+                items_category = 1
+            elif items_category == 'Work':
+                items_category = 2
+            elif items_category == 'Fax':
+                items_category = 3
 
             # Executing statement.
             cur.execute(f"""INSERT INTO items (contact, contact_id, contact_type_id, contact_category_id)
@@ -142,28 +136,24 @@ VALUES ('{items_contact}', '{contact_id}', '{items_type}', '{items_category}');"
         cur.close()
 
 
-def delete_data(conn, first_name, last_name):
+def delete_data(conn):
     try:
+        # Formatting name
+        first_name = input(
+            "Please enter the first name of the person you with to delete: ").strip().title()
+        last_name = input(
+            "Please enter the last name of the person you with to delete: ").strip().title()
+
         # Create a cursor:
         cur = conn.cursor()
 
-        # Check if name in phonelist
+        # Get contact id
+        contact_id = find_id(cur, first_name, last_name)
 
-        # Executing a statement.
-        cur.execute("SELECT * FROM view_contacts;")
-
-        # Check return from executed statement.
-        rows = cur.fetchall()
-
-        for row in rows:
-            if first_name == row[0] and last_name == row[1]:
-                # Executing statement.
-                cur.execute(f"""DELETE FROM contacts
-WHERE first_name = '{first_name}'
-AND last_name = '{last_name}';""")
-            print(f"{first_name} {last_name} deleted.")
-        else:
-            print("Name not recognized.")
+        # Executing statement.
+        cur.execute(f"""DELETE FROM contacts WHERE id = '{contact_id}'""")
+        cur.execute(f"""DELETE FROM items WHERE contact_id = '{contact_id}'""")
+        print(f"{first_name} {last_name} deleted.")
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
@@ -185,53 +175,68 @@ def save_changes(conn):
     conn.commit()
 
 
-# Running the program
-conn = connect_db()
+def find_id(cur, first_name, last_name):
+    # Find id
+    cur.execute(
+        f"SELECT id FROM contacts WHERE first_name = '{first_name}' AND last_name = '{last_name}';")
+    # Check return from executed statement.
+    rows = cur.fetchall()
 
-# Messages
-print("Please enter one of the following commands:")
-print("")
-print("LIST - Prints a list of all contacts.")
-print("INSERT - Inserts contact to list.")
-print("DELETE first_name last_name - Deletes contact from list..")
-print("QUIT - Exists the program.")
-
-while True:
-    user_input = input("Command: ").strip().split()
-
-    user_input[0] = user_input[0].upper()
-
-    # Formatting name
-    first_name = user_input[1]
-    first_name = name.title()
-    last_name = user_input[2]
-    last_name = name.title()
-
-    # Selection menu
-    # LIST
-    if user_input[0] == "LIST":
-        list_data(conn)
-
-    # INSERT
-    elif user_input[0] == "INSERT":
-        insert_data(conn)
-
-    # DELETE
-    elif user_input[0] == "DELETE":
-        delete_data(conn, first_name, last_name)
-
-    # QUIT
-    elif user_input[0] == "QUIT":
-        print("Commiting all changes.")
-        save_changes(conn)
-        print("Connection to database closed.")
-        print("Good bye!")
-        break
-
-    # Wrong input
+    if rows is None:
+        print("Can't find the contact.")
     else:
-        print("Please enter a valid command.")
-        print("""LIST
-LIST first_name last_name number
-DELETE first_name last_name
-QUIT""")
+        for row in rows:
+            contact_id = row[0]
+            return contact_id
+
+
+def assessment():
+    # Running the program
+    conn = connect_db()
+
+    # Messages
+    print("Please enter one of the following commands:")
+    print("")
+    print("LIST - Prints a list of all contacts.")
+    print("INSERT - Inserts contact to list.")
+    print("DELETE first_name last_name - Deletes contact from list..")
+    print("QUIT - Exists the program.")
+
+    while True:
+        user_input = input("Command: ").strip().split()
+
+        user_input[0] = user_input[0].upper()
+
+        # Selection menu
+        # LIST
+        if user_input[0] == "LIST":
+            list_data(conn)
+
+        # INSERT
+        elif user_input[0] == "INSERT":
+            insert_data(conn)
+
+        # DELETE
+        elif user_input[0] == "DELETE":
+            delete_data(conn)
+
+        # QUIT
+        elif user_input[0] == "QUIT":
+            print("Commiting all changes.")
+            save_changes(conn)
+            conn.close()
+            print("Connection to database closed.")
+            print("Good bye!")
+            break
+
+        # Wrong input
+        else:
+            print("Please enter a valid command.")
+            print("""LIST
+    LIST first_name last_name number
+    DELETE first_name last_name
+    QUIT""")
+
+
+if __name__ == "__main__":
+    assessment()
