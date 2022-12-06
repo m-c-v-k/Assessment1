@@ -1,8 +1,32 @@
 #! python3
 
-# Creating project outline
+# Importing necessary libraries
+import psycopg2
 
-# TODO 1. Connect to database
+
+def connect_db():
+    """ Connects to the database
+
+    Returns:
+        Object: Database connection
+    """
+
+    try:
+        conn = psycopg2.connect(
+            host="localhost",
+            port=5432,
+            database="assessment",
+            user="postgres",
+            password="MisoDaisy"
+        )
+
+        return conn
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
+test = connect_db()
+
 # TODO Commit
 
 # TODO 2. Fetch data
