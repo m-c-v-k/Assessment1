@@ -25,8 +25,6 @@ def connect_db():
         print(error)
 
 
-test = connect_db()
-
 # TODO Commit
 
 # TODO 2. Fetch data
