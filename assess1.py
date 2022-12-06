@@ -53,7 +53,7 @@ def list_data(conn):
         cur.close()
 
 
-def insert_data(conn, datatype):
+def insert_data(conn):
     try:
         # Create a cursor.
         cur = conn.cursor()
