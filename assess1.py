@@ -53,8 +53,93 @@ def list_data(conn):
         cur.close()
 
 
-def insert_data(conn):
-    print("do something")
+def insert_data(conn, datatype):
+    try:
+        # Create a cursor.
+        cur = conn.cursor()
+
+        # Get relevant information
+        contacts_first_name = input("Please input the first name").title()
+        contacts_last_name = input("Please input the last name").title()
+        contacts_title = input("Please input the title").title()
+        contacts_organization = input("Please input the organization").title()
+
+        if contacts_first_name == '':
+            contacts_first_name = 'UNKNOWN'
+        if contacts_last_name == '':
+            contacts_last_name = 'NULL'
+        if contacts_title == '':
+            contacts_title = 'NULL'
+        if contacts_organization == '':
+            contacts_organization = 'NULL'
+
+        # Executing statement.
+        cur.execute(f"""INSERT INTO contacts (first_name, last_name, title, organization)
+VALUES ('{contacts_first_name}', '{contacts_last_name}', '{contacts_title}', '{contacts_organization}');""")
+
+        # Save table.
+        save_changes(conn)
+
+        items_numbers = int(
+            input("Please input the number of contact informations to add"))
+
+        # Find id
+        cur.execute(
+            f"SELECT id FROM contacts WHERE first_name = '{contacts_first_name}' AND last_name = '{contacts_last_name}';")
+        # Check return from executed statement.
+        rows = cur.fetchall()
+
+        if rows is None:
+            print("Can't find the contact.")
+        else:
+            for row in rows:
+                contact_id = row[0]
+
+        for entries in range(items_numbers):
+            items_contact = input("Please input the contact information")
+            items_type = input(
+                "Please input the contact type (Email, Phone, Skype or Instagram)").title()
+            items_category = input(
+                "Please input the contact category (Home, Work, Fax)").title()
+
+            if items_contact == '':
+                items_contact = 'UNKNOWN'
+
+            if items_type == '':
+                items_type = 'NULL'
+            elif items_type == 'Email':
+                items_type = 1
+            elif items_type == 'Phone':
+                items_type = 2
+            elif items_type == 'Skype':
+                items_type = 3
+            elif items_type == 'Instagram':
+                items_type = 4
+
+            if items_category == '':
+                items_category = 'NULL'
+            elif items_type == 'Home':
+                items_type = 1
+            elif items_type == 'Work':
+                items_type = 2
+            elif items_type == 'Fax':
+                items_type = 3
+
+            # Executing statement.
+            cur.execute(f"""INSERT INTO items (contact, contact_id, contact_type_id, contact_category_id)
+VALUES ('{items_contact}', '{contact_id}', '{items_type}', '{items_category}');""")
+
+        print(f"{contacts_first_name} {contacts_last_name} added.")
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+    finally:
+        # Save table.
+        save_changes(conn)
+
+        # Close communication with database.
+        cur.close()
 
 
 def delete_data(conn, first_name, last_name):
